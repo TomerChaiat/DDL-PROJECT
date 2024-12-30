@@ -185,7 +185,7 @@
             <mxPoint x="-100" y="260" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="j0SL_xLkmIAa-dE_FRkC-60" value="file" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="j0SL_xLkmIAa-dE_FRkC-60" value="document" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="-630" y="177" width="90" height="43" as="geometry" />
         </mxCell>
         <mxCell id="j0SL_xLkmIAa-dE_FRkC-61" value="sub-folder" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
