@@ -1,0 +1,113 @@
+CREATE TABLE Contact(
+    Name VARCHAR(50),
+    Address VARCHAR(50),
+    PhoneNumber VARCHAR(12)
+        CHECK (Contact.PhoneNumber LIKE '9725%')
+    PRIMARY KEY (Name)
+)
+
+CREATE TABLE Shared_Contacts(
+    Contact VARCHAR(50),
+    HasContact VARCHAR(50) NOT NULL,
+    PRIMARY KEY (Contact, HasContact),
+    FOREIGN KEY (Contact) REFERENCES Contact(Name) ON DELETE CASCADE,
+    FOREIGN KEY (HasContact) REFERENCES Contact(Name) ON DELETE NO ACTION
+)
+
+CREATE TABLE Zoom_Meeting(
+    Time TIMESTAMP,
+    Subject VARCHAR(50) NOT NULL,
+    PRIMARY KEY (Time)
+)
+
+CREATE TABLE Participant_Meeting(
+    Time TIMESTAMP,
+    Participant VARCHAR(50),
+    PRIMARY KEY (Time, Participant),
+    FOREIGN KEY (Time) REFERENCES Zoom_Meeting(Time) ON DELETE NO ACTION,
+    FOREIGN KEY (Participant) REFERENCES Contact(Name) ON DELETE CASCADE
+)
+
+CREATE TABLE Late(
+    DelayTime INT NOT NULL,
+    LatePerson VARCHAR(50),
+    CausedPerson VARCHAR(50),
+    Meeting TIMESTAMP,
+    PRIMARY KEY (LatePerson, CausedPerson, Meeting),
+    FOREIGN KEY (Meeting, LatePerson) REFERENCES Participant_Meeting(Time, Participant) ON DELETE NO ACTION,
+    FOREIGN KEY (CausedPerson) REFERENCES Contact(name) ON DELETE NO ACTION
+)
+
+CREATE TABLE Folder(
+    FolderID INT,
+    FolderName VARCHAR(50) NOT NULL,
+    CreationDate DATE NOT NULL,
+    Parent INT
+        DEFAULT NULL,
+    FOREIGN KEY (Parent) REFERENCES Folder(FolderID) ON DELETE NO ACTION,
+    PRIMARY KEY (FolderID)
+)
+
+CREATE TABLE Document
+(
+    Location INT,
+    FileName VARCHAR(50),
+    FileSuffix VARCHAR(3),
+    FileSize INT NOT NULL,
+    FOREIGN KEY (Location) REFERENCES Folder (FolderID) ON DELETE CASCADE ,
+    PRIMARY KEY (Location, FileName, FileSuffix)
+)
+
+CREATE TABLE Important_File(
+    Location INT,
+    FileName VARCHAR(50),
+    FileSuffix VARCHAR(3),
+    ModifiedMeeting TIMESTAMP NOT NULL,
+    TotalTime INT NOT NULL
+        CHECK (TotalTime >= 0),
+    FOREIGN KEY (Location, FileName, FileSuffix) REFERENCES Document(Location, FileName, FileSuffix)
+                           ON DELETE CASCADE,
+    FOREIGN KEY (ModifiedMeeting) REFERENCES Zoom_Meeting(Time),
+    PRIMARY KEY (Location, FileName, FileSuffix)
+)
+
+CREATE TABLE AssignmentFile(
+    Location INT,
+    FileName VARCHAR(50),
+    FileSuffix VARCHAR(3),
+    IsNameInFormat INT NOT NULL
+        CHECK (IsNameInFormat = 0 OR IsNameInFormat = 1),
+    FOREIGN KEY (Location, FileName, FileSuffix) REFERENCES Document(Location, FileName, FileSuffix)
+                           ON DELETE CASCADE,
+    PRIMARY KEY (Location, FileName, FileSuffix)
+)
+
+CREATE TABLE Access(
+    Date TIMESTAMP,
+    Cause VARCHAR(50) NOT NULL,
+    ContactName VARCHAR(50),
+    FOREIGN KEY (ContactName) REFERENCES Contact(Name) ON DELETE CASCADE,
+    PRIMARY KEY (Date)
+)
+
+CREATE TABLE Exceptions(
+    ExceptionID INT,
+    DangerLevel FLOAT NOT NULL
+        CHECK (0 <= DangerLevel AND DangerLevel <= 10),
+    AccessException TIMESTAMP NOT NULL,
+    FOREIGN KEY (AccessException) REFERENCES Access(Date) ON DELETE NO ACTION,
+    PRIMARY KEY (ExceptionID)
+)
+
+
+DROP TABLE Exceptions
+DROP TABLE Access
+DROP TABLE AssignmentFile
+DROP TABLE Important_File
+DROP TABLE Document
+DROP TABLE Folder
+DROP TABLE Late
+DROP TABLE Participant_Meeting
+DROP TABLE Zoom_Meeting
+DROP TABLE Shared_Contacts
+DROP TABLE Contact
