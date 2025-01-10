@@ -58,3 +58,77 @@ DROP VIEW ConditionA
 DROP VIEW ConditionB
 DROP VIEW ConditionC
 DROP VIEW PopularRate
+
+
+
+
+CREATE VIEW Cohesive_Cities AS
+SELECT DISTINCT c.city
+FROM Contacts c
+WHERE c.city NOT IN (
+    SELECT c1.city
+    FROM Contacts c1
+    WHERE (
+              SELECT COUNT(cc1.savedContact)
+              FROM CommonContacts cc1
+                       JOIN Contacts c2
+                            ON cc1.savedContact = c2.name
+              WHERE cc1.contactSaver = c1.name
+                AND c2.city = c1.city
+          ) < (
+                  SELECT COUNT(*)
+                  FROM Contacts c3
+                  WHERE c3.city = c1.city
+              ) - 1
+);
+
+CREATE VIEW Condition1
+AS SELECT cc.contactSaver AS name
+FROM CommonContacts cc
+WHERE contactSaver NOT IN (
+    SELECT cc1.contactSaver
+    FROM CommonContacts cc1 INNER JOIN Contacts c ON cc1.savedContact = c.name
+    WHERE c.name != cc1.nickname)
+
+
+CREATE VIEW Condition2
+AS SELECT c.name
+FROM Contacts c
+WHERE name NOT IN (
+    SELECT c1.name
+    FROM Contacts c1 Join Attendance a ON c1.name = a.contactName
+    WHERE a.delay > 50
+    )
+
+CREATE VIEW Live_In_Cohesive_Cities
+AS SELECT c.name
+FROM Contacts c JOIN Cohesive_Cities cc
+ON c.city = cc.city
+
+
+SELECT DISTINCT name, MIN(date)
+FROM Attendance A JOIN Live_In_Cohesive_Cities l ON a.contactName = l.name
+WHERE l.name IN (
+    SELECT contactName
+    FROM Attendance
+SELECT name FROM Condition1 INTERSECT SELECT name FROM Condition2)
+     ON A.contactName = p.name
+GROUP BY name
+
+
+(
+    SELECT name AS MeetingWithOrgenizedContacts
+    FROM Contacts JOIN Attendance ON contactName = name
+    WHERE name IN (
+
+    )
+    )
+
+
+
+
+
+DROP VIEW Cohesive_Cities
+DROP VIEW Condition1
+DROP VIEW Condition2
+DROP VIEW Live_In_Cohesive_Cities
