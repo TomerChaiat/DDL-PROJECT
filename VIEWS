@@ -1,0 +1,48 @@
+CREATE VIEW PopularRateAS
+SELECT
+    savedContact AS name,
+    COUNT(savedContact = name) AS rate
+FROM CommonContacts
+GROUP BY savedContact;
+
+
+CREATE VIEW PopularContacts AS
+SELECT
+    cc.savedContact AS name
+FROM CommonContacts cc
+         JOIN Contacts c
+              ON cc.contactSaver = c.name
+GROUP BY cc.savedContact
+HAVING COUNT(DISTINCT c.city) >= 2
+
+INTERSECT
+
+SELECT
+    cc1.contactSaver AS name
+FROM CommonContacts cc1
+         LEFT JOIN CommonContacts cc2
+                   ON  cc1.savedContact   = cc2.contactSaver
+                       AND cc1.contactSaver   = cc2.savedContact
+GROUP BY cc1.contactSaver
+HAVING COUNT(*) = COUNT(cc2.contactSaver)
+
+INTERSECT
+
+SELECT
+    cc.contactSaver AS name
+FROM CommonContacts cc
+         JOIN PopularRate prP
+              ON cc.contactSaver = prP.name
+         JOIN PopularRate prX
+              ON cc.savedContact = prX.name
+GROUP BY
+    cc.contactSaver,
+    prP.rate
+HAVING
+    prP.rate >= MAX(prX.rate);
+
+
+SELECT DISTINCT date
+FROM Attendance A JOIN PopularContacts PC
+                        ON A.name = PC.name
+ORDER BY date ASC
