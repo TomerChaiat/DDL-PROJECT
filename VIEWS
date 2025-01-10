@@ -3,15 +3,15 @@ SELECT
     cc.savedContact AS name,
     COUNT(*) AS rate
 FROM CommonContacts cc
-GROUP BY cc.savedContact
+GROUP BY cc.savedContact;
 
 
 CREATE VIEW ConditionA AS
 SELECT
     cc.savedContact AS name
 FROM CommonContacts cc
-        JOIN Contacts c
-            ON cc.contactSaver = c.name
+         JOIN Contacts c
+              ON cc.contactSaver = c.name
 GROUP BY cc.savedContact
 HAVING COUNT(DISTINCT c.city) >= 2;
 
@@ -20,37 +20,38 @@ CREATE VIEW ConditionB AS
 SELECT
     cc1.contactSaver AS name
 FROM CommonContacts cc1
-        LEFT JOIN CommonContacts cc2
-            ON  cc1.savedContact = cc2.contactSaver
-            AND cc1.contactSaver = cc2.savedContact
-        WHERE cc1.contactSaver != cc1.savedContact
+         LEFT JOIN CommonContacts cc2
+                   ON  cc1.savedContact = cc2.contactSaver
+                       AND cc1.contactSaver = cc2.savedContact
+WHERE cc1.contactSaver != cc1.savedContact
 GROUP BY cc1.contactSaver
 HAVING COUNT(cc1.savedContact) = COUNT(cc2.contactSaver);
+
 
 
 CREATE VIEW ConditionC AS
 SELECT
     cc.contactSaver AS name
 FROM CommonContacts cc
-        JOIN PopularRate prP
-            ON cc.contactSaver = prP.name
-        JOIN PopularRate prX
-            ON cc.savedContact = prX.name
+         JOIN PopularRate prP
+              ON cc.contactSaver = prP.name
+         JOIN PopularRate prX
+              ON cc.savedContact = prX.name
 WHERE prP.rate >= prX.rate
-GROUP BY cc.contactSaver,prP.rate;
+GROUP BY cc.contactSaver, prP.rate;
 
 
 SELECT DISTINCT A.date
 FROM Attendance A
-        JOIN
-    (
-        SELECT name FROM ConditionA
-        INTERSECT
-        SELECT name FROM ConditionB
-        INTERSECT
-        SELECT name FROM ConditionC
-    ) AS PC
-    ON A.contactName = PC.name
+         JOIN
+     (
+         SELECT name FROM ConditionA
+         INTERSECT
+         SELECT name FROM ConditionB
+         INTERSECT
+         SELECT name FROM ConditionC
+     ) AS PC
+     ON A.contactName = PC.name
 ORDER BY A.date ASC;
 
 DROP VIEW ConditionA
