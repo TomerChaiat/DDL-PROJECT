@@ -2,7 +2,7 @@ CREATE TABLE Contact(
     Name VARCHAR(50),
     Address VARCHAR(50),
     PhoneNumber VARCHAR(12)
-        CHECK (Contact.PhoneNumber LIKE '9725%')
+        CHECK (Contact.PhoneNumber LIKE '9725%' AND LEN(PhoneNumber) = 12)
     PRIMARY KEY (Name)
 )
 
@@ -48,13 +48,18 @@ CREATE TABLE Folder(
     PRIMARY KEY (FolderID)
 )
 
-CREATE TABLE Document
-(
+CREATE TABLE File_Type(
+    FileSuffix VARCHAR(3),
+    PRIMARY KEY (FileSuffix),
+)
+
+CREATE TABLE Document(
     Location INT,
     FileName VARCHAR(50),
     FileSuffix VARCHAR(3),
     FileSize INT NOT NULL,
     FOREIGN KEY (Location) REFERENCES Folder (FolderID) ON DELETE CASCADE ,
+    FOREIGN KEY (FileSuffix) REFERENCES File_Type (FileSuffix) ON DELETE NO ACTION,
     PRIMARY KEY (Location, FileName, FileSuffix)
 )
 
@@ -86,16 +91,21 @@ CREATE TABLE Access(
     Date TIMESTAMP,
     Cause VARCHAR(50) NOT NULL,
     ContactName VARCHAR(50),
+    FileType VARCHAR(3),
     FOREIGN KEY (ContactName) REFERENCES Contact(Name) ON DELETE CASCADE,
-    PRIMARY KEY (Date)
+    FOREIGN KEY (FileType) REFERENCES File_Type(FileSuffix) ON DELETE NO ACTION,
+    PRIMARY KEY (Date, ContactName, FileType)
 )
 
 CREATE TABLE Exceptions(
     ExceptionID INT,
     DangerLevel FLOAT NOT NULL
         CHECK (0 <= DangerLevel AND DangerLevel <= 10),
-    AccessException TIMESTAMP NOT NULL,
-    FOREIGN KEY (AccessException) REFERENCES Access(Date) ON DELETE NO ACTION,
+    AccessDate TIMESTAMP NOT NULL,
+    AccessContactName VARCHAR(50),
+    AccessFileType VARCHAR(3),
+    FOREIGN KEY (AccessDate, AccessContactName, AccessFileType)
+        REFERENCES Access(Date, ContactName, FileType) ON DELETE NO ACTION,
     PRIMARY KEY (ExceptionID)
 )
 
@@ -105,6 +115,7 @@ DROP TABLE Access
 DROP TABLE AssignmentFile
 DROP TABLE Important_File
 DROP TABLE Document
+DROP TABLE File_Type
 DROP TABLE Folder
 DROP TABLE Late
 DROP TABLE Participant_Meeting
